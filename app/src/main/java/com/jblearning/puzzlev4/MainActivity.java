@@ -51,37 +51,40 @@ public class MainActivity extends AppCompatActivity
     int puzzleHeight = screenHeight - statusBarHeight - actionBarHeight;
     puzzleView = new PuzzleView( this, puzzleWidth, puzzleHeight,
                                  puzzle.getNumberOfParts( ) );
-    String [] scrambled = puzzle.scramble( );
+    String [][] scrambled = puzzle.scramble( );
     puzzleView.fillGui( scrambled );
     puzzleView.enableListener( this );
     setContentView( puzzleView );
 
-    DoubleTapHandler dth = new DoubleTapHandler( );
-    detector = new GestureDetector( this, dth );
-    detector.setOnDoubleTapListener( dth );
+//    DoubleTapHandler dth = new DoubleTapHandler( );
+//    detector = new GestureDetector( this, dth );
+//    detector.setOnDoubleTapListener( dth );
   }
 
   public boolean onTouch( View v, MotionEvent event ) {
-    int index = puzzleView.indexOfTextView( v );
+    int indexX = puzzleView.indexOfTextViewX( v );
+    int indexJ = puzzleView.indexOfTextViewJ(v);
+
     int action = event.getAction( );
     switch( action ) {
       case MotionEvent.ACTION_DOWN:
         // initialize data before move
-        puzzleView.updateStartPositions( index, ( int ) event.getY( ) );
+        puzzleView.updateStartPositions( indexX, indexJ, ( int ) event.getY( ), (int) event.getX() );
         // bring v to front
         puzzleView.bringChildToFront( v );
         break;
       case MotionEvent.ACTION_MOVE:
         // update y position of TextView being moved
-        puzzleView.moveTextViewVertically( index, ( int ) event.getY( ) );
+        puzzleView.moveTextView( indexX, indexJ,  ( int ) event.getY( ), (int) event.getX());
         break;
       case MotionEvent.ACTION_UP:
         // move is complete: swap the 2 TextViews
-        int newPosition = puzzleView.tvPosition( index );
-        puzzleView.placeTextViewAtPosition( index, newPosition );
+        int newPositionX = puzzleView.tvPositionX( indexX, indexJ );
+        int newPositionY = puzzleView.tvPositionY( indexX, indexJ );
+        puzzleView.placeTextViewAtPosition( indexX, indexJ, newPositionX, newPositionY );
         // if user just won, disable listener to stop the game
-        if( puzzle.solved( puzzleView.currentSolution( ) ) )
-          puzzleView.disableListener( );
+//        if( puzzle.solved( puzzleView.currentSolution( ) ) )
+//          puzzleView.disableListener( );
         break;
     }
     return true;
@@ -92,18 +95,18 @@ public class MainActivity extends AppCompatActivity
     return true;
   }
 
-  private class DoubleTapHandler
-    extends GestureDetector.SimpleOnGestureListener {
-    public boolean onDoubleTapEvent( MotionEvent event ) {
-      int touchY = ( int ) event.getRawY( );
-      // y coordinate of the touch within puzzleView is
-      // touchY - actionBarHeight - statusBarHeight
-      int index = puzzleView.indexOfTextView( touchY
-          - actionBarHeight - statusBarHeight );
-      if( puzzleView.getTextViewText( index )
-        .equals( puzzle.wordToChange( ) ) )
-        puzzleView.setTextViewText( index, puzzle.replacementWord( ) );
-      return  true;
-    }
-  }
+//  private class DoubleTapHandler
+//    extends GestureDetector.SimpleOnGestureListener {
+//    public boolean onDoubleTapEvent( MotionEvent event ) {
+//      int touchY = ( int ) event.getRawY( );
+//      // y coordinate of the touch within puzzleView is
+//      // touchY - actionBarHeight - statusBarHeight
+//      int index = puzzleView.indexOfTextView( touchY
+//          - actionBarHeight - statusBarHeight );
+//      if( puzzleView.getTextViewText( index )
+//        .equals( puzzle.wordToChange( ) ) )
+//        puzzleView.setTextViewText( index, puzzle.replacementWord( ) );
+//      return  true;
+//    }
+//  }
 }
